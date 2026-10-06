@@ -1,0 +1,55 @@
+name: Merge voiceover and publish Short
+
+# The daily Shorts agent pushes a branch named job/<id> containing:
+#   job/job.json      {"id", "audio_url", "title"}
+#   job/video.mp4     silent 1080x1920 master, timed to the voiceover
+#   job/thumbnail.png optional 1080x1920 cover
+# This workflow downloads the ElevenLabs voiceover, merges it into the video,
+# verifies the result and publishes it as release short-<id>. The agent then
+# hands the release URL to Metricool to schedule the YouTube upload.
+
+on:
+  push:
+    branches: ["job/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg jq
+
+      - name: Merge voiceover
+        id: merge
+        run: bash scripts/merge.sh job
+
+      - name: Publish release
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ID="$(jq -r .id job/job.json)"
+          TAG="short-${ID}"
+          TITLE="$(jq -r '.title // "Daily Short"' job/job.json)"
+          ASSETS=(job/result.json)
+          [ -f job/final.mp4 ] && ASSETS+=(job/final.mp4)
+          [ -f job/thumbnail.png ] && ASSETS+=(job/thumbnail.png)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" --title "$TITLE" --notes "Daily Short ${ID} — status: $(jq -r .status job/result.json)"
+          fi
+
+      - name: Remove job branch
+        if: success()
+        run: git push origin --delete "${GITHUB_REF_NAME}"
