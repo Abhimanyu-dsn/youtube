@@ -1,0 +1,56 @@
+name: Generate voiceover
+
+# The daily Shorts agent pushes a branch named vo/<id> containing:
+#   vo/request.json  {"id", "text", "voice_id", "model_id"}
+# This workflow calls ElevenLabs with the ELEVENLABS_API_KEY repository secret,
+# then publishes release vo-<id> with voice.mp3, words.json (word timings) and
+# result.json. The agent downloads those from the release, renders the video
+# to the timings, and points job.json's audio_url at the public release asset,
+# so no API key or signed URL ever appears in this public repo.
+
+on:
+  push:
+    branches: ["vo/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg jq
+
+      - name: Generate voiceover
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 scripts/tts.py vo
+
+      - name: Publish release
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ID="$(jq -r .id vo/request.json)"
+          TAG="vo-${ID}"
+          [ -f vo/result.json ] || echo '{"status":"failed","reason":"tts step crashed"}' > vo/result.json
+          ASSETS=(vo/result.json)
+          [ -f vo/voice.mp3 ] && ASSETS+=(vo/voice.mp3)
+          [ -f vo/words.json ] && ASSETS+=(vo/words.json)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" --title "Voiceover ${ID}" --notes "status: $(jq -r .status vo/result.json)"
+          fi
+
+      - name: Remove vo branch
+        if: success()
+        run: git push origin --delete "${GITHUB_REF_NAME}"
