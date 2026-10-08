@@ -13,7 +13,7 @@ fail() {
   exit 1
 }
 
-dur() { ffprobe -v error -show_entries format=duration -of csv=p=0 "$1"; }
+dur() { ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$1" | head -1 | tr -cd 0-9.; }
 
 [ -f job.json ] || fail "job.json missing"
 [ -f video.mp4 ] || fail "video.mp4 missing"
@@ -37,8 +37,8 @@ ffmpeg -v error -y -i video.mp4 -i voice.audio \
   -map 0:v:0 -map "[a]" -c:v copy -c:a aac -b:a 192k -shortest \
   -movflags +faststart final.mp4 || fail "ffmpeg merge failed"
 
-W="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 final.mp4)"
-H="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 final.mp4)"
+W="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=nw=1:nk=1 final.mp4 | head -1 | tr -cd 0-9)"
+H="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=nw=1:nk=1 final.mp4 | head -1 | tr -cd 0-9)"
 HAS_AUDIO="$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 final.mp4 | head -1)"
 FD="$(dur final.mp4)"
 
