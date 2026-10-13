@@ -1,0 +1,6 @@
+{
+  "id": "2026-10-13",
+  "text": "Stop fixing headlines with Shift Enter. You force a line break so one word isn't left hanging, then the frame gets narrower and your break lands in the wrong place. Figma now has a real fix: Text Wrap, in your text settings. Balance evens out line lengths, so a two-line headline splits evenly. Pretty only fixes the ending, so a paragraph never finishes on one lonely word. Use Balance for headings, Pretty for body copy, and set it inside your text styles so the whole system gets it. CSS has the same two values, so developers can match it in one line. Every line deserves a clean ending. Here's mine: subscribe for the next type fix.",
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2"
+}
