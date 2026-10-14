@@ -1,0 +1,6 @@
+{
+ "id": "2026-10-14",
+ "text": "Stop searching your UI library for onboarding. Search for the behaviour you need. Mobbin's Deep Search just entered beta. Instead of matching keywords, it reads the intent behind your query, then checks each result for relevance. So you can type: onboarding where users can skip steps and finish setup later. And you get screens that actually do that, not fifty generic welcome pages. Each Deep Search uses five credits, Pro includes about sixty a month, and the same search works inside AI tools like Claude Code through Mobbin's MCP. The real skill is the query. Describe the behaviour, not the screen. Better references make better designs. Next week's find is already queued, so tap subscribe.",
+ "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+ "model_id": "eleven_multilingual_v2"
+}
