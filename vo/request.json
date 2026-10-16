@@ -1,0 +1,6 @@
+{
+  "id": "2026-10-16",
+  "text": "Your AI feature will guess wrong. What matters is how fast people can fix it. Google's new workout detection gets this right. Your watch logs the workout on its own, then a notification says tennis detected, with two buttons: Confirm, or Something else. No digging through your history to find the mistake. That's the pattern. When your product guesses, show the guess, put the fix right next to it, and make it one tap. Then feed every correction back in, so the next guess is better. Automation without an easy fix feels like being overruled. Design the correction first. Think of subscribe as your confirm button, and I'll keep sending patterns worth confirming.",
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2"
+}
