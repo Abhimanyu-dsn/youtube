@@ -1,0 +1,6 @@
+{
+  "id": "2026-10-19",
+  "text": "Your AI agent builds the wrong thing because the brief lives in a doc it never sees. Figma just moved the brief onto the canvas. Press D and you get a Spec, a Markdown doc sitting right next to your frames. Type slash to add blocks, then drag in real frames, FigJam flows and code layers. Need technical context? Pull it in from GitHub with a connector. Then hand it off: coding agents on Figma's MCP server can read the spec and what it links to. Writing is free; only agent edits use AI credits. It's rolling out in open beta on paid plans. Better briefs make better builds. Subscribe, I'll keep sharing the workflows that work.",
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2"
+}
