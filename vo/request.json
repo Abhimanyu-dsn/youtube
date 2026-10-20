@@ -1,0 +1,6 @@
+{
+  "id": "2026-10-20",
+  "text": "Your nested cards look slightly off, and it's the corners. Use the same radius inside and out, and the gap swells at every corner. The fix is one subtraction: inner radius equals outer radius minus padding. Outer card twenty-four, padding sixteen, so the inner card gets eight. Now both curves share a center and the gap stays even all the way around. In CSS, use calc, radius minus padding, wrapped in max with zero pixels so it never goes negative. Wider padding on the sides? Give each axis its own radius. People feel this before they can name it. Now you can. For more details like that, subscribe.",
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2"
+}
