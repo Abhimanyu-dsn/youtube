@@ -6,19 +6,31 @@ Reads  <dir>/request.json  {"id", "text", "voice_id", "model_id"}
 Writes <dir>/voice.mp3, <dir>/words.json, <dir>/result.json
 Needs  ELEVENLABS_API_KEY in the environment (a GitHub Actions secret).
 The key is only ever read from the environment; it is never written to disk or logged.
+
+If ElevenLabs refuses the request for quota/credit reasons (or the key is missing),
+the free Kokoro voice is used instead (scripts/tts_kokoro.py); result.json then has
+"provider": "kokoro" and the ElevenLabs error in "fallback_reason".
 """
 import base64, json, os, subprocess, sys, urllib.error, urllib.request
 
 d = sys.argv[1] if len(sys.argv) > 1 else "vo"
 
 def done(status, **kw):
-    json.dump({"status": status, **kw}, open(os.path.join(d, "result.json"), "w"), indent=2)
+    json.dump({"status": status, "provider": "elevenlabs", **kw}, open(os.path.join(d, "result.json"), "w"), indent=2)
     print(status.upper(), kw.get("reason", ""))
     sys.exit(0 if status == "ok" else 1)
 
+def kokoro(reason):
+    """Hand over to the free Kokoro voice; never returns."""
+    print("Falling back to Kokoro:", reason)
+    r = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tts_kokoro.py"), d, reason])
+    sys.exit(r.returncode)
+
+QUOTA_HINTS = ("quota", "credit", "insufficient", "payment", "limit_exceeded", "subscription")
+
 key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
 if not key:
-    done("failed", reason="ELEVENLABS_API_KEY secret is not set on the repository")
+    kokoro("ELEVENLABS_API_KEY secret is not set on the repository")
 try:
     req = json.load(open(os.path.join(d, "request.json")))
 except Exception as e:
@@ -40,7 +52,10 @@ try:
         data = json.load(resp)
 except urllib.error.HTTPError as e:
     detail = e.read().decode("utf-8", "replace")[:400]
-    done("failed", reason=f"ElevenLabs HTTP {e.code}: {detail}")
+    reason = f"ElevenLabs HTTP {e.code}: {detail}"
+    if e.code in (401, 402, 429) and (e.code == 402 or any(h in detail.lower() for h in QUOTA_HINTS)):
+        kokoro(reason)
+    done("failed", reason=reason)
 except Exception as e:
     done("failed", reason=f"ElevenLabs request failed: {e}")
 
